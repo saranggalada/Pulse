@@ -221,7 +221,7 @@ st.set_page_config(page_icon="img/pulse.png", page_title="⚡Pulse", layout="cen
 
 st.write("""
          # ⚡Pulse
-            Blazing fast ⚡ **pincode-merchant** retrieval for ONDC! 🚀
+            Blazing fast ⚡ **PINcode-merchant** retrieval for ONDC! 🚀
          """)
 st.write('---')
 
