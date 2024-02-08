@@ -227,7 +227,7 @@ st.write('---')
 
 
 cols = st.columns(2)
-admin = cols[0].toggle('Admin 🔑', (0, 1))
+admin = cols[0].toggle('Admin 🔑')
 user='None'
 if(admin):
   cols[0].write('Mode: **Admin 🛠️**')
