@@ -217,11 +217,11 @@ tree, load_time = load_radix_tree()
 
 ### APP UI
 
-st.set_page_config(page_icon="img/pulse.png", page_title="⚡Pulse", layout="centered")
+st.set_page_config(page_icon="img/pulse.png", page_title="Pulse⚡", layout="centered")
 
 st.write("""
          # ⚡Pulse
-            Blazing fast ⚡ **PIN Code - Merchant** retrieval for ONDC! 🚀
+            Blazing fast 🚀 **PIN Code - Merchant** retrieval for ONDC!
          """)
 st.write('---')
 
