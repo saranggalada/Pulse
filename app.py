@@ -10,6 +10,48 @@ import pickle
 
 ##########################################################################################################
 
+## APP BASIC UI
+
+st.set_page_config(page_icon="img/pulse.png", page_title="Pulse⚡", layout="centered")
+
+st.write("""
+         # ⚡Pulse
+            Blazing fast 🚀 **PIN Code - Merchant** retrieval engine for ONDC! [`Learn More`](https://docs.google.com/presentation/d/11vU81WRVayVceGUhq59F0aTHsiWjH3yR3yEglaLAFsQ)
+         """)
+st.write('---')
+
+
+## Sidebar
+st.sidebar.image("img/pulse.png")
+st.sidebar.markdown("<h2 style='text-align: center;'>⚡Pulse</h2>", unsafe_allow_html=True)
+st.sidebar.write('---')
+st.sidebar.markdown("""
+                    For the [**Build for Bharat 2024**](https://hack2skill.com/build-for-bharat-hackathon-ondc-google-cloud) Hackathon organized by [ONDC](https://ondc.in/) and [Google Cloud](https://cloud.google.com/)')
+                    """)
+st.sidebar.write('---')
+cols = st.sidebar.columns(3)
+cols[0].link_button('GitHub', 'https://github.com/saranggalada/Pulse')
+cols[1].link_button('Author', 'https://www.linkedin.com/in/saranggalada')
+cols[2].link_button('PPT', 'https://docs.google.com/presentation/d/11vU81WRVayVceGUhq59F0aTHsiWjH3yR3yEglaLAFsQ')
+st.sidebar.markdown("---\n*Copyright (c) 2024: Sarang Galada*")
+
+st.sidebar.write('---')
+st.sidebar.header('See Also')
+st.sidebar.markdown(
+    """
+- [EPL Viz](https://epl-viz.streamlit.app/) 🕵🏼 \
+(Visualizing 24 years of EPL!)
+- [The Pitch Prophecy](https://pitch-prophecy.streamlit.app/) 🔮 \
+(EPL Win Predictor!)
+- [The xG Philosophy](https://xg-philosophy.streamlit.app/) 🧙🏼‍♂️ \
+(EPL xG Projector!)
+"""
+)
+st.sidebar.markdown('---')
+
+
+##########################################################################################################
+
 ### DATA ARCHITECTURE DESIGN
 
 # Defining the Radix Tree Class - The minimalist data structure used for the Pincode-Merchant Mapping
@@ -43,7 +85,7 @@ class RadixTree:
         node = self.root
         for digit in pincode:
             if digit not in node.children:
-                return  # ie. Pincode not found
+                return 0 # ie. Pincode not found
             node = node.children[digit]
         node.merchant_ids.discard(merchant_id)
 
@@ -125,6 +167,7 @@ def save_radix_tree(tree, filename='data/radix_tree.pkl'):
         pickle.dump(tree, f)
 
 ## Load the Radix Tree from a file
+@st.cache_resource      # Caching the function to avoid repeated calls
 def load_radix_tree(filename='data/radix_tree.pkl'):
     try:
         t0 = time.time()
@@ -134,6 +177,20 @@ def load_radix_tree(filename='data/radix_tree.pkl'):
         return tree, t1-t0      # Additionally returns the time taken to load the tree
     except:
         return RadixTree(), 0
+
+## Upload a Radix Tree file
+@st.cache_resource      # Caching the function to avoid repeated calls
+def upload_radix_tree(pkl):
+    return pickle.load(pkl)
+
+## CSV to Radix Tree
+@st.cache_resource      # Caching the function to avoid repeated calls
+def csv_to_radix_tree(csv):
+    df = pd.read_csv(csv)
+    tree = RadixTree()
+    for i in df.columns:
+        tree.load_merchant(df[i].values, i)
+    return tree
 
 
 ##########################################################################################################
@@ -152,8 +209,9 @@ def update_merchant(tree, old_merchant_pins, new_merchant_pins, merchant_id):
 
 ## Remove a merchant from the Radix Tree
 def remove_merchant(tree, merchant_id):
+    merchant_id = int(merchant_id)
     for pincode in get_all_pincodes():
-        merchant_ids = tree.search(pincode)
+        merchant_ids = tree.search(str(pincode))
         if merchant_id in merchant_ids:
             tree.delete(pincode, merchant_id)
 
@@ -167,7 +225,7 @@ def update_pincode(tree, old_pincode, new_pincode, merchant_id):
     
 ## Remove a pincode for a merchant from the Radix Tree
 def remove_pincode(tree, pincode, merchant_id):
-    tree.delete(pincode, merchant_id)
+    return tree.delete(pincode, int(merchant_id))
 
 
 ##########################################################################################################
@@ -210,21 +268,16 @@ def load_merchants(pincode):
 ### INITIALIZATION
     
 # Load the Radix Tree
-tree, load_time = load_radix_tree()
 
+if 'registry' not in st.session_state:
+    tree, load_time = load_radix_tree()
+    st.session_state.registry = tree
+else:
+    tree = st.session_state.registry
 
 ##########################################################################################################
 
 ### APP UI
-
-st.set_page_config(page_icon="img/pulse.png", page_title="Pulse⚡", layout="centered")
-
-st.write("""
-         # ⚡Pulse
-            Blazing fast 🚀 **PIN Code - Merchant** retrieval for ONDC!
-         """)
-st.write('---')
-
 
 cols = st.columns(2)
 admin = cols[0].toggle('Admin 🔑')
@@ -239,23 +292,73 @@ st.write('---')
 
 ## Admin Mode
 if admin:
-    merchant_pins = st.file_uploader('PIN Codes file', type=['npy'])
+    # st.write('##### Upload Existing Registry')
+    st.write('Either an existing registry (ie. Radix Tree in `PKL` format) containing all the Merchant - PIN Code mappings can be uploaded **OR** a `CSV file` with Merchant IDs as column names and serviceable PIN codes as column values must be uploaded...from which a Radix Tree-based registry will be built.')
     cols = st.columns(2)
-    add = cols[0].button('➕ **Add Merchant**')
+    pkl = cols[0].file_uploader('##### 📤 Upload Existing Registry', type=['pkl'])
+    csv = cols[1].file_uploader('##### 🔨 Build Registry from CSV', type=['csv'])
+    if pkl:
+        tree = upload_radix_tree(pkl)
+        st.session_state.registry = tree
+        cols[0].success('✅ Registry Loaded!')
+    if csv:
+        tree = csv_to_radix_tree(csv)
+        st.session_state.registry = tree
+        cols[1].success('✅ Registry Built!')
+    st.write('---')
+
+    st.write('##### 🔧 Modify Registry')
+    st.write('Add or remove merchants from the registry. New merchant files must be in .npy format and contain the list of PIN codes serviceable by that Merchant. Make sure to specify the Merchant ID first.')
+    cols = st.columns(2)
+    merchant_id = cols[0].text_input('🧑🏻‍💼Merchant ID', value='1234')
+    merchant_pins = cols[1].file_uploader('###### ➕ Add Merchant', type=['npy'])
     rem = cols[0].button('🗑️ **Remove Merchant**')
-    merchant_id = cols[1].text_input('Merchant ID', value='1234')
-    if add:
+    if merchant_pins:
         add_merchant(tree, np.load(merchant_pins), merchant_id)
+        st.session_state.registry = tree
         cols[0].success('Added Merchant '+merchant_id+'!')
     if rem:
         remove_merchant(tree, merchant_id)
-        cols[0].success('Removed Merchant '+merchant_id+'!')
+        st.session_state.registry = tree
+        cols[1].success('Removed Merchant '+merchant_id+'!')
 
-    save_radix_tree(tree)
+    # save_radix_tree(tree)
     st.write('---')
+
+    st.write('Add or remove PIN codes for a specific merchant from the registry.')
+    cols = st.columns(2)
+    merchant_id = cols[0].text_input('👨🏻‍💼 Merchant ID', value='1234')
+    pincode = cols[1].text_input('📍 PIN Code', value='110001')
+    a = cols[0].button("📌 **Add PIN Code**")
+    # u = cols[0].button("🔄 **Update Pincode**")
+    r = cols[1].button("❌ **Remove PIN Code**")
+    if a:
+        add_pincode(tree, pincode, merchant_id)
+        st.session_state.registry = tree
+        cols[0].success('✅ Saved!')
+    if r:
+        status = remove_pincode(tree, pincode, merchant_id)
+        if status == 0:
+            cols[1].error('❌ PIN Not Found!')
+        else:
+            st.session_state.registry = tree
+            cols[1].success('✅ Saved!')
+
+    st.write('---')
+
+    # # Download the Radix Tree
+    # st.write('##### 📥 Download Registry')
+    # cols = st.columns(2)
+    # filename = cols[0].text_input('📦 File Name', value='radix_tree.pkl')
+    # d = cols[1].button("📥 **Download**")
+    # if d:
+    #     save_radix_tree(tree, filename)
+    #     cols[1].success('✅ Saved!')
 
 ## Merchant Mode
 elif user == 'Merchant' and admin == False:
+    st.write('##### ⚙️ Merchant Controls')
+    st.write('Add or remove PIN codes for your serviceable area.')
     cols = st.columns(2)
     merchant_id = cols[0].text_input('👨‍💼 Merchant ID', value='1234')
     pincode = cols[1].text_input('📍 PIN Code', value='110001')
@@ -264,20 +367,26 @@ elif user == 'Merchant' and admin == False:
     r = cols[1].button("❌ **Remove PIN Code**")
     if a:
         add_pincode(tree, pincode, merchant_id)
+        st.session_state.registry = tree
         cols[0].success('✅ Saved!')
     if r:
-        remove_pincode(tree, pincode, merchant_id)
-        cols[1].success('✅ Saved!')
+        status = remove_pincode(tree, pincode, merchant_id)
+        if status == 0:
+            cols[1].error('❌ PIN Not Found!')
+        else:
+            st.session_state.registry = tree
+            cols[1].success('✅ Saved!')
 
-    save_radix_tree(tree)
+    # save_radix_tree(tree)
     st.write('---')
 
 ## Customer Mode
 elif user == 'Customer' and admin == False:
+    tree = st.session_state.registry
     cols = st.columns(2)
+    pincode = cols[1].text_input('📍 PIN  Code', value='110001')
     c = cols[0].button("❓ **Check Serviceability**")
     s = cols[0].button("🔍 **Search Merchants**")
-    pincode = cols[1].text_input('📍 PIN  Code', value='110001')
     # cols[1].write("Actions")
     if c:
         if is_serviceable(tree, pincode):
@@ -292,32 +401,3 @@ elif user == 'Customer' and admin == False:
         st.dataframe(pd.DataFrame(merchant_ids, columns=['Merchant IDs']).T)
 
     st.write('---')
-
-
-## Sidebar
-st.sidebar.image("img/pulse.png")
-st.sidebar.markdown("<h2 style='text-align: center;'>⚡Pulse</h2>", unsafe_allow_html=True)
-st.sidebar.write('---')
-st.sidebar.markdown("""
-                    For the [**Build for Bharat 2024**](https://hack2skill.com/build-for-bharat-hackathon-ondc-google-cloud) Hackathon organized by [ONDC](https://ondc.in/) and [Google Cloud](https://cloud.google.com/)')
-                    """)
-st.sidebar.write('---')
-cols = st.sidebar.columns(3)
-cols[0].link_button('GitHub', 'https://github.com/saranggalada/Pulse')
-cols[1].link_button('Author', 'https://www.linkedin.com/in/saranggalada')
-cols[2].link_button('PPT', 'https://docs.google.com/presentation/d/11vU81WRVayVceGUhq59F0aTHsiWjH3yR3yEglaLAFsQ')
-st.sidebar.markdown("---\n*Copyright (c) 2024: Sarang Galada*")
-
-st.sidebar.write('---')
-st.sidebar.header('See Also')
-st.sidebar.markdown(
-    """
-- [EPL Viz](https://epl-viz.streamlit.app/) 🕵🏼 \
-(Visualizing 24 years of EPL!)
-- [The Pitch Prophecy](https://pitch-prophecy.streamlit.app/) 🔮 \
-(EPL Win Predictor!)
-- [The xG Philosophy](https://xg-philosophy.streamlit.app/) 🧙🏼‍♂️ \
-(EPL xG Projector!)
-"""
-)
-st.sidebar.markdown('---')
