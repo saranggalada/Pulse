@@ -1,6 +1,3 @@
 streamlit
 numpy
 pandas
-time
-pickle
-random
