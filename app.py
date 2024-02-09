@@ -233,7 +233,7 @@ if(admin):
   cols[0].write('Mode: **Admin 🛠️**')
 else:
     cols[0].write('Mode: **User 👨🏻‍💻**')
-    user = cols[1].radio('User Mode 👨🏻‍💻', ('Customer', 'Merchant'), horizontal=True)
+    user = cols[1].radio('User Mode 👤', ('Customer', 'Merchant'), horizontal=True)
 st.write('---')
 
 
