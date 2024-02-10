@@ -293,7 +293,7 @@ st.write('---')
 ## Admin Mode
 if admin:
     # st.write('##### Upload Existing Registry')
-    st.write('Either an existing registry (ie. Radix Tree in `PKL` format) containing all the Merchant - PIN Code mappings can be uploaded **OR** a `CSV file` with Merchant IDs as column names and serviceable PIN codes as column values must be uploaded...from which a Radix Tree-based registry will be built.')
+    st.write('Either an existing registry (ie. Radix Tree in `PKL` format) containing all the Merchant - PIN Code mappings can be uploaded **OR** a `CSV file` with Merchant IDs as column names and serviceable PIN codes as column values must be uploaded...from which a Radix Tree-based registry will be built.  [`Sample Data`](https://drive.google.com/drive/folders/11WeynH-EPI471MQIrg1kXN16zF6stdyG)')
     cols = st.columns(2)
     pkl = cols[0].file_uploader('##### 📤 Upload Existing Registry', type=['pkl'])
     csv = cols[1].file_uploader('##### 🔨 Build Registry from CSV', type=['csv'])
