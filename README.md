@@ -1,6 +1,6 @@
 # ⚡Pulse
 
-Blazing fast 🚀 `PIN Code - Merchant` retrieval engine for ONDC! [`Learn more`](https://docs.google.com/presentation/d/11vU81WRVayVceGUhq59F0aTHsiWjH3yR3yEglaLAFsQ) <br>
+Blazing fast 🚀 `PIN Code - Merchant` retrieval engine for ONDC! [`Learn more`](https://docs.google.com/presentation/d/11vU81WRVayVceGUhq59F0aTHsiWjH3yR3yEglaLAFsQ), [`Demo`](https://youtu.be/0y6aefeDs_0) <br>
 (*Developed for ONDC's Build for Bharat 2024 Hackathon*)
 
 [![Open App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://pulse-ondc.streamlit.app/) 
