@@ -16,7 +16,7 @@ st.set_page_config(page_icon="img/pulse.png", page_title="Pulse⚡", layout="cen
 
 st.write("""
          # ⚡Pulse
-            Blazing fast 🚀 **PIN Code - Merchant** retrieval engine for ONDC! [`Learn More`](https://docs.google.com/presentation/d/11vU81WRVayVceGUhq59F0aTHsiWjH3yR3yEglaLAFsQ)  [`Demo`](https://youtu.be/0y6aefeDs_0)
+            Blazing fast 🚀 **PIN Code - Merchant** retrieval engine for ONDC! [`Learn More`](https://docs.google.com/presentation/d/11vU81WRVayVceGUhq59F0aTHsiWjH3yR3yEglaLAFsQ) | [`Demo`](https://youtu.be/0y6aefeDs_0)
          """)
 st.write('---')
 
