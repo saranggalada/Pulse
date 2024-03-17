@@ -384,7 +384,7 @@ elif user == 'Merchant' and admin == False:
 elif user == 'Customer' and admin == False:
     tree = st.session_state.registry
     cols = st.columns(2)
-    pincode = cols[1].text_input('📍 PIN  Code', value='110001')
+    pincode = cols[1].text_input('📍 Enter PIN  Code', value='110001')
     c = cols[0].button("❓ **Check Serviceability**")
     s = cols[0].button("🔍 **Search Merchants**")
     # cols[1].write("Actions")
